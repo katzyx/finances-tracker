@@ -7,9 +7,7 @@ DROP TABLE IF EXISTS users;
 
 -- Create the `users` table.
 CREATE TABLE users (
-    user_id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE
+    user_id INT PRIMARY KEY AUTO_INCREMENT
 );
 
 -- Create the `accounts` table.
@@ -32,21 +30,20 @@ CREATE TABLE debts (
     debt_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     debt_name VARCHAR(255) NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL,
+    total DECIMAL(10, 2) NOT NULL,
+    payment_amount DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- Finally, create the `transactions` table after all its dependencies are in place.
 CREATE TABLE transactions (
     transaction_id INT PRIMARY KEY AUTO_INCREMENT,
     account_id INT NOT NULL,
     user_id INT NOT NULL,
     amount DECIMAL(10, 2) NOT NULL,
-    description VARCHAR(255),
+    description VARCHAR(255) NOT NULL,
     category_id INT,
     debt_id INT,
     transaction_date DATE NOT NULL,
-    notes VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
