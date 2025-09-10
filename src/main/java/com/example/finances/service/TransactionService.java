@@ -1,6 +1,6 @@
 package com.example.finances.service;
 
-import com.example.finances.model.Transaction;
+import com.example.finances.model.*;
 import com.example.finances.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class TransactionService {
                 .orElseThrow(() -> new NoSuchElementException("No transactions found for ID: " + transactionID));
     }
 
-    public List<Transaction> findByAccountID(Integer accountId) {
+    public List<Transaction> findByAccountID(Account accountId) {
         List<Transaction> transactions = transactionRepository.findByAccountId(accountId)
                 .orElseThrow(() -> new NoSuchElementException("No transactions found for account: " + accountId));
         if (transactions.isEmpty()) {
@@ -36,7 +36,7 @@ public class TransactionService {
         return transactions;
     }
 
-    public List<Transaction> findByDebtID(Integer debtId) {
+    public List<Transaction> findByDebtID(Debt debtId) {
         List<Transaction> transactions = transactionRepository.findByDebtId(debtId)
                 .orElseThrow(() -> new NoSuchElementException("No transactions found for debt: " + debtId));
         if (transactions.isEmpty()) {
@@ -45,7 +45,7 @@ public class TransactionService {
         return transactions;
     }
 
-    public List<Transaction> findByUserID(Integer userId) {
+    public List<Transaction> findByUserID(User userId) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId)
                 .orElseThrow(() -> new NoSuchElementException("No transactions found for user: " + userId));
         if (transactions.isEmpty()) {
@@ -54,7 +54,7 @@ public class TransactionService {
         return transactions;
     }
 
-    public List<Transaction> findByCategoryId(Integer categoryId) {
+    public List<Transaction> findByCategoryId(Category categoryId) {
         List<Transaction> transactions = transactionRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new NoSuchElementException("No transactions found for category: " + categoryId));
         if (transactions.isEmpty()) {
