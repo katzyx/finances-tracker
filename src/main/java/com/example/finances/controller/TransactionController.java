@@ -38,7 +38,7 @@ public class TransactionController {
     }
 
     @GetMapping("account/{accountId}")
-    public ResponseEntity<List<Transaction>> findByAccountID(@PathVariable Account accountId) {
+    public ResponseEntity<List<Transaction>> findByAccountID(@PathVariable int accountId) {
         try {
             List<Transaction> transaction = transactionService.findByAccountID(accountId);
             return ResponseEntity.ok(transaction);
@@ -49,7 +49,7 @@ public class TransactionController {
     }
 
     @GetMapping("debt/{debtId}")
-    public ResponseEntity<List<Transaction>> findByDebtID(@PathVariable Debt debtId) {
+    public ResponseEntity<List<Transaction>> findByDebtID(@PathVariable int debtId) {
         try {
             List<Transaction> transactions = transactionService.findByDebtID(debtId);
             return ResponseEntity.ok(transactions);
@@ -60,7 +60,7 @@ public class TransactionController {
     }
 
     @GetMapping("user/{userId}")
-    public ResponseEntity<List<Transaction>> findByUserId(@PathVariable User userId) {
+    public ResponseEntity<List<Transaction>> findByUserId(@PathVariable int userId) {
         try {
             List<Transaction> transactions = transactionService.findByUserID(userId);
             return ResponseEntity.ok(transactions);
@@ -71,7 +71,7 @@ public class TransactionController {
     }
 
     @GetMapping("category/{categoryId}")
-    public ResponseEntity<List<Transaction>> findByCategoryID(@PathVariable Category categoryId) {
+    public ResponseEntity<List<Transaction>> findByCategoryID(@PathVariable int categoryId) {
         try {
             List<Transaction> transactions = transactionService.findByCategoryId(categoryId);
             return ResponseEntity.ok(transactions);
