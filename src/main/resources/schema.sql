@@ -30,8 +30,9 @@ CREATE TABLE debts (
     debt_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
     debt_name VARCHAR(255) NOT NULL,
-    total DECIMAL(10, 2) NOT NULL,
-    payment_amount DECIMAL(10, 2) NOT NULL,
+    total_owed DECIMAL(10, 2) NOT NULL,
+    amount_paid DECIMAL(10, 2) NOT NULL,
+    monthly_payment DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
@@ -43,9 +44,9 @@ CREATE TABLE transactions (
     description VARCHAR(255) NOT NULL,
     category_id INT,
     debt_id INT,
-    type ENUM('income', 'expense'),
     transaction_date DATE NOT NULL,
-    recurrence ENUM('weekly', 'monthly', 'yearly'),
+    type ENUM('income', 'expense') NOT NULL,
+    recurrence ENUM('weekly', 'monthly', 'yearly') NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,

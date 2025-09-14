@@ -7,11 +7,13 @@ import com.example.finances.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
  * Service class for handling Debt-related business logic.
+ * Updated to handle simplified debt tracking with total owed vs amount paid.
  */
 @Service
 public class DebtService {
@@ -47,16 +49,51 @@ public class DebtService {
      * Finds all debts for a specific user.
      * @param userId The ID of the user.
      * @return A list of debts for the given user.
-     * @throws NoSuchElementException if the user or any debts for that user are not found.
+     * @throws NoSuchElementException if the user is not found.
      */
     public List<Debt> findDebtsByUserId(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
 
-        List<Debt> debts = debtRepository.findByUserId(user)
-                .orElseThrow(() -> new NoSuchElementException("No debts found for user with ID: " + userId));
+        return debtRepository.findByUserId(user)
+                .orElse(List.of()); // Return empty list instead of throwing exception
+    }
 
-        return debts;
+    /**
+     * Finds active debts (not fully paid off) for a user.
+     * @param userId The ID of the user.
+     * @return A list of active debts.
+     */
+    public List<Debt> findActiveDebtsByUserId(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
+
+        return debtRepository.findActiveDebtsByUser(user);
+    }
+
+    /**
+     * Finds paid-off debts for a user.
+     * @param userId The ID of the user.
+     * @return A list of paid-off debts.
+     */
+    public List<Debt> findPaidOffDebtsByUserId(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
+
+        return debtRepository.findPaidOffDebtsByUser(user);
+    }
+
+    /**
+     * Gets the total remaining debt for a user across all debts.
+     * @param userId The ID of the user.
+     * @return The total remaining debt amount.
+     */
+    public BigDecimal getTotalRemainingDebt(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
+
+        return debtRepository.getTotalRemainingDebtByUser(user)
+                .orElse(BigDecimal.ZERO);
     }
 
     /**
@@ -65,6 +102,16 @@ public class DebtService {
      * @return The saved Debt object.
      */
     public Debt addDebt(Debt debt) {
+        // Ensure amount paid is not null and defaults to 0
+        if (debt.getAmountPaid() == null) {
+            debt.setAmountPaid(BigDecimal.ZERO);
+        }
+
+        // Validate that amount paid doesn't exceed total owed
+        if (debt.getAmountPaid().compareTo(debt.getTotalOwed()) > 0) {
+            throw new IllegalArgumentException("Amount paid cannot exceed total owed");
+        }
+
         return debtRepository.save(debt);
     }
 
@@ -80,10 +127,45 @@ public class DebtService {
                 .map(debt -> {
                     debt.setUserId(updatedDebt.getUserId());
                     debt.setDebtName(updatedDebt.getDebtName());
-                    debt.setTotal(updatedDebt.getTotal());
-                    debt.setPaymentAmount(updatedDebt.getPaymentAmount());
+                    debt.setTotalOwed(updatedDebt.getTotalOwed());
+                    debt.setMonthlyPayment(updatedDebt.getMonthlyPayment());
+
+                    // Ensure amount paid is not null and doesn't exceed total owed
+                    BigDecimal newAmountPaid = updatedDebt.getAmountPaid() != null ?
+                            updatedDebt.getAmountPaid() : BigDecimal.ZERO;
+
+                    if (newAmountPaid.compareTo(updatedDebt.getTotalOwed()) > 0) {
+                        throw new IllegalArgumentException("Amount paid cannot exceed total owed");
+                    }
+
+                    debt.setAmountPaid(newAmountPaid);
                     return debtRepository.save(debt);
                 }).orElseThrow(() -> new NoSuchElementException("Cannot update. No debt found with ID: " + debtId));
+    }
+
+    /**
+     * Makes a payment towards a debt, updating the amount paid.
+     * @param debtId The ID of the debt to make payment on.
+     * @param paymentAmount The amount of the payment.
+     * @return The updated Debt object.
+     * @throws NoSuchElementException if the debt is not found.
+     * @throws IllegalArgumentException if payment amount is invalid.
+     */
+    public Debt makePayment(int debtId, BigDecimal paymentAmount) {
+        if (paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Payment amount must be positive");
+        }
+
+        Debt debt = findDebtById(debtId);
+        BigDecimal newAmountPaid = debt.getAmountPaid().add(paymentAmount);
+
+        if (newAmountPaid.compareTo(debt.getTotalOwed()) > 0) {
+            throw new IllegalArgumentException("Payment would exceed total owed. Maximum payment: "
+                    + debt.getRemainingBalance());
+        }
+
+        debt.setAmountPaid(newAmountPaid);
+        return debtRepository.save(debt);
     }
 
     /**

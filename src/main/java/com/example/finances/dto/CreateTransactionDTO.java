@@ -1,9 +1,6 @@
 package com.example.finances.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,12 +36,12 @@ public class CreateTransactionDTO {
     @Min(value = 1, message = "Category ID must be a positive integer")
     private Integer categoryId;
 
-    private Integer debtId;
+    private Integer debtId; // Optional
 
     @NotBlank(message = "Type is mandatory")
+    @Pattern(regexp = "^(income|expense)$", message = "Type must be either 'income' or 'expense'")
     private String type;
 
-    @NotBlank(message = "Recurrence is mandatory")
-    private String recurrence;
-
+    @Pattern(regexp = "^(weekly|monthly|yearly)?$", message = "Recurrence must be 'weekly', 'monthly', 'yearly', or empty")
+    private String recurrence; // Optional - can be null or empty string
 }

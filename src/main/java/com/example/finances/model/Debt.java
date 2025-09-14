@@ -2,9 +2,15 @@ package com.example.finances.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "debts")
+@Getter
+@Setter
 public class Debt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,56 +25,39 @@ public class Debt {
     @Column(nullable = false, name = "debt_name")
     private String debtName;
 
-    @Column(nullable = false, name = "total")
-    private int total;
+    @Column(nullable = false, name = "total_owed")
+    private BigDecimal totalOwed;
 
-    @Column(nullable = false, name = "payment_amount")
-    private int paymentAmount;
+    @Column(nullable = false, name = "amount_paid")
+    private BigDecimal amountPaid = BigDecimal.ZERO;
+
+    @Column(nullable = false, name = "monthly_payment")
+    private BigDecimal monthlyPayment;
 
     public Debt() {
-
     }
 
-    public Debt(User userId, String debtName, int total, int paymentAmount) {
+    public Debt(User userId, String debtName, BigDecimal totalOwed,
+                BigDecimal amountPaid, BigDecimal monthlyPayment) {
         this.userId = userId;
         this.debtName = debtName;
-        this.total = total;
-        this.paymentAmount = paymentAmount;
+        this.totalOwed = totalOwed;
+        this.amountPaid = amountPaid;
+        this.monthlyPayment = monthlyPayment;
     }
 
-    public int getDebtId() {
-        return debtId;
+    // Calculated field - remaining balance
+    public BigDecimal getRemainingBalance() {
+        return totalOwed.subtract(amountPaid);
     }
 
-    public User getUserId() {
-        return userId;
-    }
-
-    public void setUserId(User userId) {
-        this.userId = userId;
-    }
-
-    public String getDebtName() {
-        return debtName;
-    }
-
-    public void setDebtName(String debtName) {
-        this.debtName = debtName;
-    }
-
-    public int getTotal() {
-        return total;
-    }
-
-    public void setTotal(int total) {
-        this.total = total;
-    }
-
-    public int getPaymentAmount() {
-        return paymentAmount;
-    }
-
-    public void setPaymentAmount(int paymentAmount) {
-        this.paymentAmount = paymentAmount;
+    // Calculated field - progress percentage
+    public double getPaymentProgress() {
+        if (totalOwed.compareTo(BigDecimal.ZERO) == 0) {
+            return 0.0;
+        }
+        return amountPaid.divide(totalOwed, 4, java.math.RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .doubleValue();
     }
 }

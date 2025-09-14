@@ -147,7 +147,13 @@ public class TransactionService {
         newTransaction.setDebtId(debt);
         newTransaction.setTransactionDate(LocalDate.now());
         newTransaction.setType(createTransactionDTO.getType());
-        newTransaction.setRecurrence(createTransactionDTO.getRecurrence());
+
+        // Handle null/empty recurrence - store as null in database if empty
+        String recurrence = createTransactionDTO.getRecurrence();
+        if (recurrence != null && recurrence.trim().isEmpty()) {
+            recurrence = null;
+        }
+        newTransaction.setRecurrence(recurrence);
 
         return transactionRepository.save(newTransaction);
     }

@@ -9,72 +9,56 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "transactions")
+@Getter
+@Setter
 public class Transaction {
-    
-    @Getter
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, name = "transaction_id")
     private int transactionId;
 
-    @Setter
-    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable= false, name = "account_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Account accountId;
 
-    @Getter
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "user_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User userId;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private double amount;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String description;
 
-    @Setter
-    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "category_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Category categoryId;
 
-    @Setter
-    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "debt_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Debt debtId;
 
-    @Setter
-    @Getter
     @Column(nullable = false, name = "transaction_date")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private LocalDate transactionDate;
 
-    @Setter
-    @Getter
     @Column(nullable = false, name = "type")
-    private String type;
+    private String type; // "income" or "expense"
 
-    @Getter
-    @Setter
-    @Column(nullable = false, name = "recurrence")
-    private String recurrence;
+    @Column(name = "recurrence")
+    private String recurrence; // "weekly", "monthly", "yearly", or null
 
     public Transaction() {
     }
 
-    public Transaction(Account accountId, User userId, double amount, String description, Category categoryId, Debt debtId, LocalDate transactionDate, String type, String recurrence) {
+    public Transaction(Account accountId, User userId, double amount, String description,
+                       Category categoryId, Debt debtId, LocalDate transactionDate,
+                       String type, String recurrence) {
         this.accountId = accountId;
         this.userId = userId;
         this.amount = amount;

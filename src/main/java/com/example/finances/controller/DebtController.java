@@ -2,16 +2,18 @@ package com.example.finances.controller;
 
 import com.example.finances.model.Debt;
 import com.example.finances.service.DebtService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
  * REST controller for the Debt entity.
- * Provides endpoints for managing debts.
+ * Updated to handle simplified debt tracking with payment progress.
  */
 @RestController
 @CrossOrigin
@@ -64,14 +66,63 @@ public class DebtController {
     }
 
     /**
+     * Finds active debts (not fully paid off) for a specific user.
+     * @param userId The ID of the user.
+     * @return A ResponseEntity containing a list of active debts.
+     */
+    @GetMapping("/user/{userId}/active")
+    public ResponseEntity<List<Debt>> findActiveDebtsByUserId(@PathVariable int userId) {
+        try {
+            List<Debt> activeDebts = debtService.findActiveDebtsByUserId(userId);
+            return ResponseEntity.ok(activeDebts);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    /**
+     * Finds paid-off debts for a specific user.
+     * @param userId The ID of the user.
+     * @return A ResponseEntity containing a list of paid-off debts.
+     */
+    @GetMapping("/user/{userId}/paid-off")
+    public ResponseEntity<List<Debt>> findPaidOffDebtsByUserId(@PathVariable int userId) {
+        try {
+            List<Debt> paidOffDebts = debtService.findPaidOffDebtsByUserId(userId);
+            return ResponseEntity.ok(paidOffDebts);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    /**
+     * Gets the total remaining debt for a user across all debts.
+     * @param userId The ID of the user.
+     * @return A ResponseEntity containing the total remaining debt amount.
+     */
+    @GetMapping("/user/{userId}/total-remaining")
+    public ResponseEntity<BigDecimal> getTotalRemainingDebt(@PathVariable int userId) {
+        try {
+            BigDecimal totalRemaining = debtService.getTotalRemainingDebt(userId);
+            return ResponseEntity.ok(totalRemaining);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    /**
      * Adds a new debt.
      * @param debt The Debt object to be added.
      * @return A ResponseEntity containing the newly created Debt object and a CREATED status.
      */
     @PostMapping
-    public ResponseEntity<Debt> addDebt(@RequestBody Debt debt) {
-        Debt newDebt = debtService.addDebt(debt);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newDebt);
+    public ResponseEntity<?> addDebt(@Valid @RequestBody Debt debt) {
+        try {
+            Debt newDebt = debtService.addDebt(debt);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newDebt);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     /**
@@ -81,12 +132,32 @@ public class DebtController {
      * @return A ResponseEntity containing the updated Debt object or a NOT_FOUND status.
      */
     @PutMapping("/{debtId}")
-    public ResponseEntity<Debt> updateDebt(@PathVariable int debtId, @RequestBody Debt updatedDebt) {
+    public ResponseEntity<?> updateDebt(@PathVariable int debtId, @Valid @RequestBody Debt updatedDebt) {
         try {
             Debt debt = debtService.updateDebt(debtId, updatedDebt);
             return ResponseEntity.ok(debt);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    /**
+     * Makes a payment towards a specific debt.
+     * @param debtId The ID of the debt to make payment on.
+     * @param paymentRequest Object containing payment amount.
+     * @return A ResponseEntity containing the updated Debt object.
+     */
+    @PostMapping("/{debtId}/payment")
+    public ResponseEntity<?> makePayment(@PathVariable int debtId, @RequestBody PaymentRequest paymentRequest) {
+        try {
+            Debt updatedDebt = debtService.makePayment(debtId, paymentRequest.getPaymentAmount());
+            return ResponseEntity.ok(updatedDebt);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -102,6 +173,27 @@ public class DebtController {
             return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    /**
+     * Inner class for payment requests.
+     */
+    public static class PaymentRequest {
+        private BigDecimal paymentAmount;
+
+        public PaymentRequest() {}
+
+        public PaymentRequest(BigDecimal paymentAmount) {
+            this.paymentAmount = paymentAmount;
+        }
+
+        public BigDecimal getPaymentAmount() {
+            return paymentAmount;
+        }
+
+        public void setPaymentAmount(BigDecimal paymentAmount) {
+            this.paymentAmount = paymentAmount;
         }
     }
 }
