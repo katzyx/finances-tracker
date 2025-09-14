@@ -40,4 +40,11 @@ public class CreateTransactionDTO {
     private Integer categoryId;
 
     private Integer debtId;
+
+    @NotBlank(message = "Type is mandatory")
+    private String type;
+
+    @NotBlank(message = "Recurrence is mandatory")
+    private String recurrence;
+
 }

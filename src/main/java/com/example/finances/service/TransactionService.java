@@ -98,6 +98,24 @@ public class TransactionService {
         return transactions;
     }
 
+    public List<Transaction> findByType(String type) {
+        List<Transaction> transactions = transactionRepository.findByType(type)
+                .orElseThrow(() -> new NoSuchElementException("No transactions found for type: " + type));
+        if (transactions.isEmpty()) {
+            throw new NoSuchElementException("No transactions found for type: " + type);
+        }
+        return transactions;
+    }
+
+    public List<Transaction> findByRecurrence(String recurrence) {
+        List<Transaction> transactions = transactionRepository.findByRecurrence(recurrence)
+                .orElseThrow(() -> new NoSuchElementException("No transactions found for recurrence: " + recurrence));
+        if (transactions.isEmpty()) {
+            throw new NoSuchElementException("No transactions found for recurrence: " + recurrence);
+        }
+        return transactions;
+    }
+
     /**
      * Creates a new transaction.
      * @param createTransactionDTO The DTO containing the transaction details.
@@ -128,6 +146,8 @@ public class TransactionService {
         newTransaction.setCategoryId(category);
         newTransaction.setDebtId(debt);
         newTransaction.setTransactionDate(LocalDate.now());
+        newTransaction.setType(createTransactionDTO.getType());
+        newTransaction.setRecurrence(createTransactionDTO.getRecurrence());
 
         return transactionRepository.save(newTransaction);
     }
@@ -150,6 +170,8 @@ public class TransactionService {
         existingTransaction.setCategoryId(transactionDetails.getCategoryId());
         existingTransaction.setDebtId(transactionDetails.getDebtId());
         existingTransaction.setTransactionDate(transactionDetails.getTransactionDate());
+        existingTransaction.setType(transactionDetails.getType());
+        existingTransaction.setRecurrence(transactionDetails.getRecurrence());
 
         return transactionRepository.save(existingTransaction);
     }

@@ -13,4 +13,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     Optional<List<Transaction>> findByUserId(User userId);
     Optional<List<Transaction>> findByCategoryId(Category categoryId);
     Optional<List<Transaction>> findByTransactionDate(LocalDate transactionDate);
+    Optional<List<Transaction>> findByType(String type);
+    Optional<List<Transaction>> findByRecurrence(String recurrence);
 }

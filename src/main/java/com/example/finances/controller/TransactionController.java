@@ -94,6 +94,28 @@ public class TransactionController {
         }
     }
 
+    @GetMapping("/type/{type}")
+    public ResponseEntity<List<Transaction>> findByType(@PathVariable String type) {
+        try {
+            List<Transaction> transactions = transactionService.findByType(type);
+            return ResponseEntity.ok(transactions);
+        }
+        catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/recurrence/{recurrence}")
+    public ResponseEntity<List<Transaction>> findByRecurrence(@PathVariable String recurrence) {
+        try {
+            List<Transaction> transactions = transactionService.findByRecurrence(recurrence);
+            return ResponseEntity.ok(transactions);
+        }
+        catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @PostMapping
     public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody CreateTransactionDTO createTransactionDTO) {
         try {
