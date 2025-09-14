@@ -1,6 +1,6 @@
 package com.example.finances.service;
 
-import com.example.finances.dto.CreateAccountRequest;
+import com.example.finances.dto.CreateAccountDTO;
 import com.example.finances.model.Account;
 import com.example.finances.model.User;
 import com.example.finances.repository.AccountRepository;
@@ -44,16 +44,16 @@ public class AccountService {
                 .orElseThrow(() -> new NoSuchElementException("No account found for name: " + accountName));
     }
 
-    public Account createAccount(CreateAccountRequest createAccountRequest) {
+    public Account createAccount(CreateAccountDTO createAccountDTO) {
         // Step 1: Find the existing User entity by ID
-        User user = userRepository.findById(createAccountRequest.getUserId())
-                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + createAccountRequest.getUserId()));
+        User user = userRepository.findById(createAccountDTO.getUserId())
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + createAccountDTO.getUserId()));
 
         // Step 2: Create a new Account entity and link it to the managed User
         Account newAccount = new Account();
         newAccount.setUserId(user);
-        newAccount.setAccountName(createAccountRequest.getAccountName());
-        newAccount.setAccountBalance(createAccountRequest.getAccountBalance());
+        newAccount.setAccountName(createAccountDTO.getAccountName());
+        newAccount.setAccountBalance(createAccountDTO.getAccountBalance());
 
         // Step 3: Save the new Account
         return accountRepository.save(newAccount);

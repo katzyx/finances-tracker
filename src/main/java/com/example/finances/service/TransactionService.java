@@ -1,5 +1,6 @@
 package com.example.finances.service;
 
+import com.example.finances.dto.CreateTransactionDTO;
 import com.example.finances.model.*;
 import com.example.finances.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,72 @@ public class TransactionService {
         }
         return transactions;
     }
+
+    /**
+     * Creates a new transaction.
+     * @param createTransactionDTO The DTO containing the transaction details.
+     * @return The created Transaction object.
+     * @throws NoSuchElementException if a related entity (Account, User, Category, or Debt) is not found.
+     */
+    public Transaction createTransaction(CreateTransactionDTO createTransactionDTO) {
+        Account account = accountRepository.findById(createTransactionDTO.getAccountId())
+                .orElseThrow(() -> new NoSuchElementException("Account not found with ID: " + createTransactionDTO.getAccountId()));
+        User user = userRepository.findById(createTransactionDTO.getUserId())
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + createTransactionDTO.getUserId()));
+        Category category = categoryRepository.findById(createTransactionDTO.getCategoryId())
+                .orElseThrow(() -> new NoSuchElementException("Category not found with ID: " + createTransactionDTO.getCategoryId()));
+
+        Debt debt = null;
+        Integer debtId = createTransactionDTO.getDebtId();
+        // Check if debtId is valid (not null and a positive number) before trying to find it
+        if (debtId != null && debtId > 0) {
+            debt = debtRepository.findById(debtId)
+                    .orElseThrow(() -> new NoSuchElementException("Debt not found with ID: " + debtId));
+        }
+
+        Transaction newTransaction = new Transaction();
+        newTransaction.setAccountId(account);
+        newTransaction.setUserId(user);
+        newTransaction.setAmount(createTransactionDTO.getAmount());
+        newTransaction.setDescription(createTransactionDTO.getDescription());
+        newTransaction.setCategoryId(category);
+        newTransaction.setDebtId(debt);
+        newTransaction.setTransactionDate(LocalDate.now());
+
+        return transactionRepository.save(newTransaction);
+    }
+
+    /**
+     * Updates an existing transaction.
+     * @param transactionId The ID of the transaction to update.
+     * @param transactionDetails The updated details of the transaction.
+     * @return The updated Transaction object.
+     * @throws NoSuchElementException if the transaction is not found.
+     */
+    public Transaction updateTransaction(int transactionId, Transaction transactionDetails) {
+        Transaction existingTransaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new NoSuchElementException("Transaction not found with ID: " + transactionId));
+
+        existingTransaction.setAccountId(transactionDetails.getAccountId());
+        existingTransaction.setUserId(transactionDetails.getUserId());
+        existingTransaction.setAmount(transactionDetails.getAmount());
+        existingTransaction.setDescription(transactionDetails.getDescription());
+        existingTransaction.setCategoryId(transactionDetails.getCategoryId());
+        existingTransaction.setDebtId(transactionDetails.getDebtId());
+        existingTransaction.setTransactionDate(transactionDetails.getTransactionDate());
+
+        return transactionRepository.save(existingTransaction);
+    }
+
+    /**
+     * Deletes a transaction by its ID.
+     * @param transactionId The ID of the transaction to delete.
+     * @throws NoSuchElementException if the transaction is not found.
+     */
+    public void deleteTransaction(int transactionId) {
+        if (!transactionRepository.existsById(transactionId)) {
+            throw new NoSuchElementException("Transaction not found with ID: " + transactionId);
+        }
+        transactionRepository.deleteById(transactionId);
+    }
 }
-
-

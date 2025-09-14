@@ -3,7 +3,7 @@ package com.example.finances.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "debt")
+@Table(name = "debts")
 public class Debt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

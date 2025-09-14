@@ -4,8 +4,12 @@ import java.math.BigDecimal;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Getter;
+import lombok.Setter;
 
-public class CreateAccountRequest {
+@Setter
+@Getter
+public class CreateAccountDTO {
     @NotNull(message = "User ID cannot be null")
     private Integer userId;
 
@@ -16,27 +20,4 @@ public class CreateAccountRequest {
     @PositiveOrZero(message = "Account balance must be a positive number or zero")
     private BigDecimal accountBalance;
 
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
-    public BigDecimal getAccountBalance() {
-        return accountBalance;
-    }
-
-    public void setAccountBalance(BigDecimal accountBalance) {
-        this.accountBalance = accountBalance;
-    }
 }

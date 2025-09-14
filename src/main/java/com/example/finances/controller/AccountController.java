@@ -1,6 +1,6 @@
 package com.example.finances.controller;
 
-import com.example.finances.dto.CreateAccountRequest;
+import com.example.finances.dto.CreateAccountDTO;
 import com.example.finances.model.Account;
 import com.example.finances.service.AccountService;
 import jakarta.validation.Valid;
@@ -58,9 +58,9 @@ public class AccountController {
     }
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@Valid @RequestBody CreateAccountRequest createAccountRequest) {
+    public ResponseEntity<Account> createAccount(@Valid @RequestBody CreateAccountDTO createAccountDTO) {
         try {
-            Account createdAccount = accountService.createAccount(createAccountRequest);
+            Account createdAccount = accountService.createAccount(createAccountDTO);
             return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

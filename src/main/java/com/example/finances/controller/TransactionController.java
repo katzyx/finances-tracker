@@ -1,7 +1,9 @@
 package com.example.finances.controller;
 
+import com.example.finances.dto.CreateTransactionDTO;
 import com.example.finances.model.*;
 import com.example.finances.service.TransactionService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -88,6 +90,36 @@ public class TransactionController {
             return ResponseEntity.ok(transactions);
         }
         catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody CreateTransactionDTO createTransactionDTO) {
+        try {
+            Transaction createdTransaction = transactionService.createTransaction(createTransactionDTO);
+            return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PutMapping("/{transactionId}")
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable int transactionId, @RequestBody Transaction transactionDetails) {
+        try {
+            Transaction updatedTransaction = transactionService.updateTransaction(transactionId, transactionDetails);
+            return ResponseEntity.ok(updatedTransaction);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/{transactionId}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable int transactionId) {
+        try {
+            transactionService.deleteTransaction(transactionId);
+            return ResponseEntity.noContent().build();
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
