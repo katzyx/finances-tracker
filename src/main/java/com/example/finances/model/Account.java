@@ -1,6 +1,9 @@
 package com.example.finances.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "accounts")
@@ -9,6 +12,7 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int accountId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "user_id")
     private User userId;
@@ -17,26 +21,26 @@ public class Account {
     private String accountName;
 
     @Column(nullable = false, name = "account_balance")
-    private int accountBalance;
+    private BigDecimal accountBalance;
 
     public Account() {
     }
 
-    public Account(User userId, String accountName, int accountBalance) {
+    public Account(User userId, String accountName, BigDecimal accountBalance) {
         this.userId = userId;
         this.accountName = accountName;
         this.accountBalance = accountBalance;
     }
 
-    public int getAccount() {
+    public int getAccountId() {
         return this.accountId;
     }
 
-    public User getUser() {
+    public User getUserId() {
         return userId;
     }
 
-    public void setUser(User userId) {
+    public void setUserId(User userId) {
         this.userId = userId;
     }
 
@@ -48,11 +52,11 @@ public class Account {
         this.accountName = accountName;
     }
 
-    public int getAccountBalance() {
+    public BigDecimal getAccountBalance() {
         return accountBalance;
     }
 
-    public void setAccountBalance(int accountBalance) {
+    public void setAccountBalance(BigDecimal accountBalance) {
         this.accountBalance = accountBalance;
     }
 }

@@ -37,7 +37,7 @@ public class TransactionService {
 
     public List<Transaction> findByAccountID(int accountId) {
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new NoSuchElementException("Account not found with ID: " + accountId));
+                .orElseThrow(() -> new NoSuchElementException("No account found with ID: " + accountId));
 
         List<Transaction> transactions = transactionRepository.findByAccountId(account)
                 .orElseThrow(() -> new NoSuchElementException("No transactions found for account: " + account));
