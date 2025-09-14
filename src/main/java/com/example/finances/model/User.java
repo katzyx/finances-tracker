@@ -13,7 +13,7 @@ public class User {
     public User() {
 
     }
-    public int getUserId(int userId) {
+    public int getUserId() {
         return this.userId;
     }
 }

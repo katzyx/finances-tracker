@@ -1,5 +1,6 @@
 package com.example.finances.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -16,10 +17,12 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable= false, name = "account_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Account accountId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "user_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User userId;
 
     @Column(nullable = false)
@@ -30,13 +33,16 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "category_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Category categoryId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "debt_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Debt debtId;
 
     @Column(nullable = false, name = "transaction_date")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private LocalDate transactionDate;
 
     public Transaction() {
