@@ -6,6 +6,7 @@ import com.example.finances.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -155,7 +156,27 @@ public class TransactionService {
         }
         newTransaction.setRecurrence(recurrence);
 
-        return transactionRepository.save(newTransaction);
+        // Save the transaction first
+        Transaction savedTransaction = transactionRepository.save(newTransaction);
+
+        // Update account balance based on transaction type
+        BigDecimal currentBalance = account.getAccountBalance();
+        BigDecimal transactionAmount = BigDecimal.valueOf(createTransactionDTO.getAmount());
+
+        if ("income".equals(createTransactionDTO.getType())) {
+            account.setAccountBalance(currentBalance.add(transactionAmount));
+        } else if ("expense".equals(createTransactionDTO.getType())) {
+            // Check if sufficient funds exist
+            if (currentBalance.compareTo(transactionAmount) < 0) {
+                throw new IllegalArgumentException("Insufficient funds. Current balance: " + currentBalance);
+            }
+            account.setAccountBalance(currentBalance.subtract(transactionAmount));
+        }
+
+        // Save updated account balance
+        accountRepository.save(account);
+
+        return savedTransaction;
     }
 
     /**
