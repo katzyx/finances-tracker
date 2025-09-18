@@ -4,7 +4,7 @@ import { NetWorthCard } from '@/components/dashboard/NetWorthCard';
 import { AccountsList } from '@/components/dashboard/AccountsList';
 import { DebtsSummary } from '@/components/dashboard/DebtsSummary';
 import { SpendingChart } from '@/components/charts/SpendingChart';
-import { Account, Debt, Transaction } from '@/types/api';
+import { type Account, type Debt, type Transaction } from '@/types/api';
 import { apiService } from '@/services/api';
 
 export function HomePage() {

@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DebtForm } from '@/components/forms/DebtForm';
-import { Debt, CreateDebtDTO } from '@/types/api';
+import { type Debt, type CreateDebtDTO } from '@/types/api';
 import { apiService } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
 

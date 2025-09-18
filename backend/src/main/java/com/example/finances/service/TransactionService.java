@@ -1,15 +1,24 @@
 package com.example.finances.service;
 
-import com.example.finances.dto.CreateTransactionDTO;
-import com.example.finances.model.*;
-import com.example.finances.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.finances.dto.CreateTransactionDTO;
+import com.example.finances.model.Account;
+import com.example.finances.model.Category;
+import com.example.finances.model.Debt;
+import com.example.finances.model.Transaction;
+import com.example.finances.model.User;
+import com.example.finances.repository.AccountRepository;
+import com.example.finances.repository.CategoryRepository;
+import com.example.finances.repository.DebtRepository;
+import com.example.finances.repository.TransactionRepository;
+import com.example.finances.repository.UserRepository;
 
 @Service
 public class TransactionService {
@@ -68,10 +77,11 @@ public class TransactionService {
                 .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
 
         List<Transaction> transactions = transactionRepository.findByUserId(user)
-                .orElseThrow(() -> new NoSuchElementException("No transactions found for user: " + user));
+                .orElse(null);
 
-        if (transactions.isEmpty()) {
-            throw new NoSuchElementException("No transactions found for user: " + userId);
+        // Return an empty list if no transactions are found, instead of throwing an exception
+        if (transactions == null || transactions.isEmpty()) {
+            return List.of();
         }
         return transactions;
     }

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { AccountForm } from '@/components/forms/AccountForm';
 import { AccountGrowthChart } from '@/components/charts/AccountGrowthChart';
-import { Account, CreateAccountDTO, Transaction } from '@/types/api';
+import { type Account, type CreateAccountDTO, type Transaction } from '@/types/api';
 import { apiService } from '@/services/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
 

@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select } from '@/components/ui/select';
 import { TransactionForm } from '@/components/forms/TransactionForm';
 import { SpendingChart } from '@/components/charts/SpendingChart';
-import { Transaction, Category, CreateTransactionDTO } from '@/types/api';
+import { type Transaction, type Category, type CreateTransactionDTO } from '@/types/api';
 import { apiService } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
 

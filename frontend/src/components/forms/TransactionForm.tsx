@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreateTransactionDTO, Account, Category, Debt } from '@/types/api';
+import { type CreateTransactionDTO, type Account, type Category, type Debt } from '@/types/api';
 import { apiService } from '@/services/api';
 
 interface TransactionFormProps {

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreateDebtDTO } from '@/types/api';
+import { type CreateDebtDTO } from '@/types/api';
 
 interface DebtFormProps {
   onSubmit: (debt: CreateDebtDTO) => void;
