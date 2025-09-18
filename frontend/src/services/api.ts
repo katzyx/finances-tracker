@@ -1,3 +1,15 @@
+import type { 
+  User, 
+  Account, 
+  Category, 
+  Debt, 
+  Transaction, 
+  CreateAccountDTO, 
+  CreateTransactionDTO, 
+  CreateDebtDTO, 
+  PaymentRequest 
+} from '@/types/api';
+
 const API_BASE = 'http://localhost:8080';
 
 class ApiService {
