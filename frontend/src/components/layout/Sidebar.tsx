@@ -6,15 +6,17 @@ import {
   TrendingUp, 
   DollarSign,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Tags
 } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Monthly Overview', href: '/transactions', icon: TrendingUp },
   { name: 'Accounts', href: '/accounts', icon: CreditCard },
   { name: 'Debts & Obligations', href: '/debts', icon: DollarSign },
+  { name: 'Categories', href: '/categories', icon: Tags },
 ];
 
 const secondaryNavigation = [

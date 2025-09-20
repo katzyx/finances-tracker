@@ -1,15 +1,17 @@
 package com.example.finances.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.finances.dto.CreateDebtDTO;
 import com.example.finances.model.Debt;
 import com.example.finances.model.User;
 import com.example.finances.repository.DebtRepository;
 import com.example.finances.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * Service class for handling Debt-related business logic.
@@ -113,6 +115,23 @@ public class DebtService {
         }
 
         return debtRepository.save(debt);
+    }
+
+    public Debt addDebtFromDTO(CreateDebtDTO createDebtDTO) {
+        // Find the User entity by userId from the DTO
+        User user = userRepository.findById(createDebtDTO.getUserId())
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + createDebtDTO.getUserId()));
+
+        // Create a new Debt entity from the DTO data
+        Debt newDebt = new Debt();
+        newDebt.setUserId(user);
+        newDebt.setDebtName(createDebtDTO.getDebtName());
+        newDebt.setTotalOwed(createDebtDTO.getTotalOwed());
+        newDebt.setMonthlyPayment(createDebtDTO.getMonthlyPayment());
+        newDebt.setAmountPaid(createDebtDTO.getAmountPaid()); // Uses the default value from the DTO
+
+        // Save the new Debt entity
+        return debtRepository.save(newDebt);
     }
 
     /**

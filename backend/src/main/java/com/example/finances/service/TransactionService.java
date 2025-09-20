@@ -1,6 +1,5 @@
 package com.example.finances.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -133,60 +132,37 @@ public class TransactionService {
      * @return The created Transaction object.
      * @throws NoSuchElementException if a related entity (Account, User, Category, or Debt) is not found.
      */
-    public Transaction createTransaction(CreateTransactionDTO createTransactionDTO) {
-        Account account = accountRepository.findById(createTransactionDTO.getAccountId())
-                .orElseThrow(() -> new NoSuchElementException("Account not found with ID: " + createTransactionDTO.getAccountId()));
-        User user = userRepository.findById(createTransactionDTO.getUserId())
-                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + createTransactionDTO.getUserId()));
-        Category category = categoryRepository.findById(createTransactionDTO.getCategoryId())
-                .orElseThrow(() -> new NoSuchElementException("Category not found with ID: " + createTransactionDTO.getCategoryId()));
+    public Transaction createTransaction(CreateTransactionDTO dto) {
+        // Find related entities by their IDs, throwing NoSuchElementException if not found.
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + dto.getUserId()));
+
+        Account account = accountRepository.findById(dto.getAccountId())
+                .orElseThrow(() -> new NoSuchElementException("Account not found with ID: " + dto.getAccountId()));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new NoSuchElementException("Category not found with ID: " + dto.getCategoryId()));
 
         Debt debt = null;
-        Integer debtId = createTransactionDTO.getDebtId();
-        // Check if debtId is valid (not null and a positive number) before trying to find it
-        if (debtId != null && debtId > 0) {
-            debt = debtRepository.findById(debtId)
-                    .orElseThrow(() -> new NoSuchElementException("Debt not found with ID: " + debtId));
+        if (dto.getDebtId() != null) {
+            debt = debtRepository.findById(dto.getDebtId())
+                    .orElseThrow(() -> new NoSuchElementException("Debt not found with ID: " + dto.getDebtId()));
         }
 
-        Transaction newTransaction = new Transaction();
-        newTransaction.setAccountId(account);
-        newTransaction.setUserId(user);
-        newTransaction.setAmount(createTransactionDTO.getAmount());
-        newTransaction.setDescription(createTransactionDTO.getDescription());
-        newTransaction.setCategoryId(category);
-        newTransaction.setDebtId(debt);
-        newTransaction.setTransactionDate(LocalDate.now());
-        newTransaction.setType(createTransactionDTO.getType());
+        // Create the new transaction entity with the retrieved objects
+        Transaction transaction = new Transaction();
+        transaction.setUserId(user);
+        transaction.setAccountId(account);
+        transaction.setCategoryId(category);
+        transaction.setDebtId(debt);
+        transaction.setAmount(dto.getAmount());
+        transaction.setDescription(dto.getDescription());
+        transaction.setType(dto.getType());
+        transaction.setRecurrence(dto.getRecurrence());
+        transaction.setTransactionDate(LocalDate.now());
 
-        // Handle null/empty recurrence - store as null in database if empty
-        String recurrence = createTransactionDTO.getRecurrence();
-        if (recurrence != null && recurrence.trim().isEmpty()) {
-            recurrence = null;
-        }
-        newTransaction.setRecurrence(recurrence);
-
-        // Save the transaction first
-        Transaction savedTransaction = transactionRepository.save(newTransaction);
-
-        // Update account balance based on transaction type
-        BigDecimal currentBalance = account.getAccountBalance();
-        BigDecimal transactionAmount = BigDecimal.valueOf(createTransactionDTO.getAmount());
-
-        if ("income".equals(createTransactionDTO.getType())) {
-            account.setAccountBalance(currentBalance.add(transactionAmount));
-        } else if ("expense".equals(createTransactionDTO.getType())) {
-            // Check if sufficient funds exist
-            if (currentBalance.compareTo(transactionAmount) < 0) {
-                throw new IllegalArgumentException("Insufficient funds. Current balance: " + currentBalance);
-            }
-            account.setAccountBalance(currentBalance.subtract(transactionAmount));
-        }
-
-        // Save updated account balance
-        accountRepository.save(account);
-
-        return savedTransaction;
+        // Save and return the new transaction
+        return transactionRepository.save(transaction);
     }
 
     /**

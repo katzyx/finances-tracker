@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, ArrowRightLeft, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, ArrowRightLeft, TrendingUp, TrendingDown } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { AccountForm } from '@/components/forms/AccountForm';
 import { AccountGrowthChart } from '@/components/charts/AccountGrowthChart';
-import { type Account, type CreateAccountDTO, type Transaction } from '@/types/api';
+import type { Account, CreateAccountDTO, Transaction } from '@/types/api';
 import { apiService } from '@/services/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
@@ -138,7 +138,59 @@ export function AccountsPage() {
     return transactions.filter(t => t.accountId.accountId === accountId);
   };
 
+  // Calculate monthly growth for an account
+  const calculateMonthlyGrowth = (account: Account) => {
+    const accountTransactions = getAccountTransactions(account.accountId);
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Get previous month
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    
+    // Filter transactions for current month
+    const currentMonthTransactions = accountTransactions.filter(t => {
+      const date = new Date(t.transactionDate);
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    });
+    
+    // Filter transactions for previous month
+    const prevMonthTransactions = accountTransactions.filter(t => {
+      const date = new Date(t.transactionDate);
+      return date.getMonth() === prevMonth && date.getFullYear() === prevYear;
+    });
+    
+    // Calculate net change for current month
+    const currentMonthNet = currentMonthTransactions.reduce((sum, t) => {
+      return sum + (t.type === 'income' ? t.amount : -t.amount);
+    }, 0);
+    
+    // Calculate net change for previous month
+    const prevMonthNet = prevMonthTransactions.reduce((sum, t) => {
+      return sum + (t.type === 'income' ? t.amount : -t.amount);
+    }, 0);
+    
+    const growth = currentMonthNet - prevMonthNet;
+    const growthPercent = prevMonthNet !== 0 ? (growth / Math.abs(prevMonthNet)) * 100 : 0;
+    
+    return {
+      amount: growth,
+      percentage: growthPercent,
+      isPositive: growth >= 0
+    };
+  };
+
   const totalBalance = accounts.reduce((sum, account) => sum + account.accountBalance, 0);
+
+  // Calculate total monthly growth
+  const totalMonthlyGrowth = accounts.reduce((sum, account) => {
+    return sum + calculateMonthlyGrowth(account).amount;
+  }, 0);
+
+  const totalGrowthPercent = accounts.length > 0 
+    ? accounts.reduce((sum, account) => sum + calculateMonthlyGrowth(account).percentage, 0) / accounts.length
+    : 0;
 
   // Generate account growth data based on actual transactions
   const generateGrowthData = (account: Account) => {
@@ -182,6 +234,10 @@ export function AccountsPage() {
     });
 
     return data.slice(-12); // Show last 12 data points
+  };
+
+  const handleAccountClick = (account: Account) => {
+    setSelectedAccount(selectedAccount?.accountId === account.accountId ? null : account);
   };
 
   if (loading) {
@@ -254,9 +310,19 @@ export function AccountsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Average Balance</p>
-                <p className="text-2xl font-bold">
-                  {formatCurrency(accounts.length > 0 ? totalBalance / accounts.length : 0)}
+                <p className="text-sm text-muted-foreground">Monthly Growth</p>
+                <div className="flex items-center space-x-2">
+                  <p className={`text-2xl font-bold ${totalMonthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(totalMonthlyGrowth)}
+                  </p>
+                  {totalMonthlyGrowth >= 0 ? (
+                    <TrendingUp className="w-6 h-6 text-green-600" />
+                  ) : (
+                    <TrendingDown className="w-6 h-6 text-red-600" />
+                  )}
+                </div>
+                <p className={`text-sm ${totalMonthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {totalGrowthPercent >= 0 ? '+' : ''}{totalGrowthPercent.toFixed(1)}% from last month
                 </p>
               </div>
             </div>
@@ -363,6 +429,7 @@ export function AccountsPage() {
               <TableRow>
                 <TableHead>Account Name</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
+                <TableHead className="text-right">Monthly Growth</TableHead>
                 <TableHead className="text-right">Transactions</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -370,13 +437,35 @@ export function AccountsPage() {
             <TableBody>
               {accounts.map((account) => {
                 const accountTransactions = getAccountTransactions(account.accountId);
+                const monthlyGrowth = calculateMonthlyGrowth(account);
                 return (
                   <TableRow key={account.accountId}>
                     <TableCell className="font-medium">
-                      {account.accountName}
+                      <button
+                        className="text-left hover:text-blue-600 hover:underline transition-colors"
+                        onClick={() => handleAccountClick(account)}
+                        title="Click to view account details and chart"
+                      >
+                        {account.accountName}
+                      </button>
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(account.accountBalance)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end space-x-1">
+                        <span className={`font-medium ${monthlyGrowth.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                          {monthlyGrowth.isPositive ? '+' : ''}{formatCurrency(monthlyGrowth.amount)}
+                        </span>
+                        {monthlyGrowth.isPositive ? (
+                          <TrendingUp className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <TrendingDown className="w-4 h-4 text-red-600" />
+                        )}
+                      </div>
+                      <div className={`text-xs ${monthlyGrowth.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                        {monthlyGrowth.percentage >= 0 ? '+' : ''}{monthlyGrowth.percentage.toFixed(1)}%
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       {accountTransactions.length}
@@ -386,9 +475,8 @@ export function AccountsPage() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => setSelectedAccount(
-                            selectedAccount?.accountId === account.accountId ? null : account
-                          )}
+                          onClick={() => handleAccountClick(account)}
+                          title="View account growth chart"
                         >
                           <TrendingUp className="w-4 h-4" />
                         </Button>
@@ -396,6 +484,7 @@ export function AccountsPage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => setEditingAccount(account)}
+                          title="Edit account details"
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -403,6 +492,7 @@ export function AccountsPage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDeleteAccount(account.accountId)}
+                          title="Delete account and all transactions"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -430,7 +520,18 @@ export function AccountsPage() {
       {selectedAccount && (
         <Card>
           <CardHeader>
-            <CardTitle>{selectedAccount.accountName} - Recent Activity</CardTitle>
+            <CardTitle>
+              {selectedAccount.accountName} - Recent Activity
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedAccount(null)}
+                className="ml-2"
+                title="Close account details"
+              >
+                ×
+              </Button>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>

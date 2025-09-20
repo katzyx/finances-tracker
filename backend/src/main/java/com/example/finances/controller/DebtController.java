@@ -1,15 +1,26 @@
 package com.example.finances.controller;
 
-import com.example.finances.model.Debt;
-import com.example.finances.service.DebtService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.finances.dto.CreateDebtDTO;
+import com.example.finances.model.Debt;
+import com.example.finances.service.DebtService;
+
+import jakarta.validation.Valid;
 
 /**
  * REST controller for the Debt entity.
@@ -116,15 +127,14 @@ public class DebtController {
      * @return A ResponseEntity containing the newly created Debt object and a CREATED status.
      */
     @PostMapping
-    public ResponseEntity<?> addDebt(@Valid @RequestBody Debt debt) {
+    public ResponseEntity<?> addDebt(@Valid @RequestBody CreateDebtDTO createDebtDTO) {
         try {
-            Debt newDebt = debtService.addDebt(debt);
+            Debt newDebt = debtService.addDebtFromDTO(createDebtDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(newDebt);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
     /**
      * Updates an existing debt.
      * @param debtId The ID of the debt to update.

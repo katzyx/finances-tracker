@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select } from '@/components/ui/select';
 import { TransactionForm } from '@/components/forms/TransactionForm';
 import { SpendingChart } from '@/components/charts/SpendingChart';
-import { type Transaction, type Category, type CreateTransactionDTO } from '@/types/api';
+import type { Transaction, Category, CreateTransactionDTO } from '@/types/api';
 import { apiService } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
 
@@ -47,10 +47,11 @@ export function TransactionsPage() {
   const handleCreateTransaction = async (transactionData: CreateTransactionDTO) => {
     try {
       await apiService.createTransaction(transactionData);
-      await loadData();
+      await loadData(); // Refresh data
       setShowForm(false);
     } catch (error) {
       console.error('Error creating transaction:', error);
+      alert('Error creating transaction. Please try again.');
     }
   };
 
@@ -67,10 +68,11 @@ export function TransactionsPage() {
       };
       
       await apiService.updateTransaction(editingTransaction.transactionId, updatedTransaction);
-      await loadData();
+      await loadData(); // Refresh data
       setEditingTransaction(null);
     } catch (error) {
       console.error('Error updating transaction:', error);
+      alert('Error updating transaction. Please try again.');
     }
   };
 
@@ -78,9 +80,11 @@ export function TransactionsPage() {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
         await apiService.deleteTransaction(id);
+        // Immediately refresh the data after successful deletion
         await loadData();
       } catch (error) {
         console.error('Error deleting transaction:', error);
+        alert('Error deleting transaction. Please try again.');
       }
     }
   };
@@ -161,6 +165,17 @@ export function TransactionsPage() {
       </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Income</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(totalIncome)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -322,6 +337,7 @@ export function TransactionsPage() {
                         size="sm"
                         variant="ghost"
                         onClick={() => setEditingTransaction(transaction)}
+                        title="Edit transaction"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -329,6 +345,7 @@ export function TransactionsPage() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDeleteTransaction(transaction.transactionId)}
+                        title="Delete transaction"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

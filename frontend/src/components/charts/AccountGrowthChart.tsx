@@ -36,6 +36,21 @@ export function AccountGrowthChart({ data, title = "Account Growth" }: AccountGr
     return null;
   };
 
+  if (data.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
+            No growth data available
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -45,15 +60,24 @@ export function AccountGrowthChart({ data, title = "Account Growth" }: AccountGr
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis tickFormatter={formatCurrency} />
+            <XAxis 
+              dataKey="date" 
+              tick={{ fontSize: 12 }}
+              tickMargin={8}
+            />
+            <YAxis 
+              tickFormatter={formatCurrency}
+              tick={{ fontSize: 12 }}
+              tickMargin={8}
+            />
             <Tooltip content={<CustomTooltip />} />
             <Line 
               type="monotone" 
               dataKey="balance" 
               stroke="#22c55e" 
               strokeWidth={2}
-              dot={{ fill: '#22c55e' }}
+              dot={{ fill: '#22c55e', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, stroke: '#22c55e', strokeWidth: 2 }}
             />
           </LineChart>
         </ResponsiveContainer>
