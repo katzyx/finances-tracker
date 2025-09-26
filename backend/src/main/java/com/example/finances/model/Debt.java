@@ -2,15 +2,11 @@ package com.example.finances.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "debts")
-@Getter
-@Setter
 public class Debt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +42,20 @@ public class Debt {
         this.monthlyPayment = monthlyPayment;
     }
 
+    // Add all the missing getters/setters
+    public int getDebtId() { return debtId; }
+    public void setDebtId(int debtId) { this.debtId = debtId; }
+    public User getUserId() { return userId; }
+    public void setUserId(User userId) { this.userId = userId; }
+    public String getDebtName() { return debtName; }
+    public void setDebtName(String debtName) { this.debtName = debtName; }
+    public BigDecimal getTotalOwed() { return totalOwed; }
+    public void setTotalOwed(BigDecimal totalOwed) { this.totalOwed = totalOwed; }
+    public BigDecimal getAmountPaid() { return amountPaid; }
+    public void setAmountPaid(BigDecimal amountPaid) { this.amountPaid = amountPaid; }
+    public BigDecimal getMonthlyPayment() { return monthlyPayment; }
+    public void setMonthlyPayment(BigDecimal monthlyPayment) { this.monthlyPayment = monthlyPayment; }
+
     // Calculated field - remaining balance
     public BigDecimal getRemainingBalance() {
         return totalOwed.subtract(amountPaid);
@@ -60,4 +70,5 @@ public class Debt {
                 .multiply(BigDecimal.valueOf(100))
                 .doubleValue();
     }
+
 }

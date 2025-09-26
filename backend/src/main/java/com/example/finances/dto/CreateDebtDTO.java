@@ -1,11 +1,6 @@
 package com.example.finances.dto;
 
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.AllArgsConstructor;
-
 import java.math.BigDecimal;
 
 /**
@@ -13,10 +8,6 @@ import java.math.BigDecimal;
  * This class is used to receive data from the API request body,
  * separating it from the JPA entity model.
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class CreateDebtDTO {
 
     @NotNull(message = "User ID is mandatory")
@@ -36,4 +27,55 @@ public class CreateDebtDTO {
     @NotNull(message = "Monthly payment is mandatory")
     @DecimalMin(value = "0.01", message = "Monthly payment must be a positive value")
     private BigDecimal monthlyPayment;
+
+    public CreateDebtDTO() {}
+
+    public CreateDebtDTO(Integer userId, String debtName, BigDecimal totalOwed, 
+                        BigDecimal amountPaid, BigDecimal monthlyPayment) {
+        this.userId = userId;
+        this.debtName = debtName;
+        this.totalOwed = totalOwed;
+        this.amountPaid = amountPaid;
+        this.monthlyPayment = monthlyPayment;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getDebtName() {
+        return debtName;
+    }
+
+    public void setDebtName(String debtName) {
+        this.debtName = debtName;
+    }
+
+    public BigDecimal getTotalOwed() {
+        return totalOwed;
+    }
+
+    public void setTotalOwed(BigDecimal totalOwed) {
+        this.totalOwed = totalOwed;
+    }
+
+    public BigDecimal getAmountPaid() {
+        return amountPaid;
+    }
+
+    public void setAmountPaid(BigDecimal amountPaid) {
+        this.amountPaid = amountPaid;
+    }
+
+    public BigDecimal getMonthlyPayment() {
+        return monthlyPayment;
+    }
+
+    public void setMonthlyPayment(BigDecimal monthlyPayment) {
+        this.monthlyPayment = monthlyPayment;
+    }
 }
